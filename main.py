@@ -3,9 +3,11 @@ import requests
 import time
 import tkinter
 import customtkinter
+# library to make tkinter table less ugly
+import sv_ttk
+
 
 # webscrape method
-# turning the main code into a function
 def find_books():
     html_text = requests.get('http://books.toscrape.com/').text
     soup = BeautifulSoup(html_text, 'lxml')
@@ -13,16 +15,11 @@ def find_books():
     # new var to hold books pulled from html taken from site before, looking for list elements with the class specified
     books = soup.find_all('li', class_='col-xs-6 col-sm-4 col-md-3 col-lg-3')
 
-    # check whether any input was given and tell them what happens in each case
+    # check whether any input was given and tell the user what happens in each case
     if search.get() or search.get() != '':
         status_label.configure(text=f'Looking for "{search.get()}"', text_color='white')
     else:
         status_label.configure(text='Displaying all books', text_color='white')
-
-    # TODO, no longer using file IO, change this to write to a dictionary/tuple/array
-    # create a file to save the results to, w mode will create a new file if one doesn't exist, also overwrite previous data
-    # f = open('list/readingList.txt', 'w')
-    # f.close()
 
     for current_book in books:
 
@@ -36,45 +33,25 @@ def find_books():
         if search.get() or search.get() != '':
             # check if it contains the searched word(s)
             if search.get().casefold() in title['title'].casefold():
-                print('test')
+                # TODO remove the first char of price or find another way to get rid of the A thing before the pound sign
+                book_info = [title.get("title", "no title found"), price, rating.get("class", "class not found")[1] + ' out of five', stock, f'http://books.toscrape.com/{title["href"]}']
 
-                # TODO not using file IO so change this
-                # # open the file stream and set mode to a or append
-                # f = open('list/readingList.txt', 'a')
-                # f.write('------------------------------------------ \n')
-                # # access the a tag's title attribute since it's not truncated, return fallback if attribute isn't found
-                # f.write(f'Title: {title.get("title", "no title found")} \n')
-                # f.write(f'Price: {price} \n')
-                # # using .get turns it into a list for some reason, use index to get number from it
-                # f.write(
-                #     f'Rating: {rating.get("class", "class not found")[1]} out of Five \n')
-                # f.write(f'Its status is: {stock} \n')
-                # f.write(  # can also get sub elements such as href, title, etc like this var['href']
-                #     f'More Information: http://books.toscrape.com/{title["href"]} \n')
-                # f.write('------------------------------------------ \n')
-                # print(f'Book "{title.get("title", "no title found")}" saved')
-                # # close the file stream
-                # f.close()
+                # insert the data into a new table row
+                table.insert('', 'end', values=book_info)
+                # use enumerate and item to loop, something about tracking index with i? idk
+                for i, item in enumerate(book_info):
+                    table.column(headers[i],anchor=tkinter.CENTER)
 
         # if search is not present, then show all books
         else:
-            print('test')
-            # # open the file stream and set mode to a or append
-            # f = open('list/readingList.txt', 'a')
-            # # f.write will write to the file specified
-            # f.write(f'------------------------------------------ \n')
-            # # access the a tag's title attribute since it's not truncated, return fallback if attribute isn't found
-            # f.write(f'Title: {title.get("title", "no title found")} \n')
-            # f.write(f'Price: {price} \n')
-            # # using .get turns it into a list for some reason, use index to get number from it
-            # f.write(
-            #     f'Rating: {rating.get("class", "class not found")[1]} out of Five \n')
-            # f.write(f'Its status is: {stock} \n')
-            # f.write(  # can also get sub elements such as href, title, etc like this var['href']
-            #     f'More Information: http://books.toscrape.com/{title["href"]} \n')
-            # f.write('------------------------------------------ \n')
-            # print(f'Book "{title.get("title", "no title found")}" saved')
-            # f.close()
+            # TODO remove the first char of price or find another way to get rid of the A thing before the pound sign
+            book_info = [title.get("title", "no title found"), price, rating.get("class", "class not found")[1] + ' out of five', stock, f'http://books.toscrape.com/{title["href"]}']
+
+            # insert the data into a new table row
+            table.insert('', 'end', values=book_info)
+            # use enumerate and item to loop, something about tracking index with i? idk
+            for i, item in enumerate(book_info):
+                table.column(headers[i],anchor=tkinter.CENTER)
 
 # ui system settings
 customtkinter.set_appearance_mode("System")
@@ -82,7 +59,7 @@ customtkinter.set_default_color_theme('blue')
 
 # initialize
 app = customtkinter.CTk()
-app.geometry("720x480")
+app.geometry("1080x720")
 app.title('GUI Webscrapper')
 
 # TITLE
@@ -99,12 +76,35 @@ search.pack(padx=10, pady=10)
 status_label = customtkinter.CTkLabel(app, text='')
 status_label.pack()
 
-# DOWNLOAD BUTTON
-# command lets you call a function
-download = customtkinter.CTkButton(app, text='Download', command=find_books)
+# SEARCH BUTTON
+download = customtkinter.CTkButton(app, text='Search', command=find_books)
 download.pack(padx=10, pady=10)
 
-# TODO, add a text area to display scrapped books
+# DISPLAY TABLE AND LABEL
+tabLabel = customtkinter.CTkLabel(app, text='Results will be displayed below, if nothing is found check your spelling or try a different book')
+tabLabel.pack()
+
+# headers used to set lead rows and loop through when adding more rows
+headers=['Title', 'Price', 'Rating', 'Stock', 'Link']
+# create the table and set row heights
+table=tkinter.ttk.Treeview(app, height=25, columns=headers, show='headings')
+# column set to give each one a more fitting width
+table.column('Title', width=400)
+# heading to create the header for each column
+table.heading('Title', text='Title')
+table.column('Price', width=100)
+table.heading('Price', text='Price')
+table.column('Rating', width=200)
+table.heading('Rating', text='Rating')
+table.column('Stock', width=150)
+table.heading('Stock', text='Stock')
+table.column('Link', width=200)
+table.heading('Link', text='Link')
+table.pack(padx=10, pady=10)
+# TODO, figure out how to add hyperlinks to the table
+
+# nifty library to make the ugly table into dark mode
+sv_ttk.set_theme("dark")
 
 # need to create a 'loop' to run the app so it doesn't close instantly
 app.mainloop()
