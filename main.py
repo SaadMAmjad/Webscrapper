@@ -5,10 +5,25 @@ import tkinter
 import customtkinter
 import sv_ttk
 
+# variables to hold the data between page switching, and the current page number respectively
+data = []
+pages = 0
+
 # function to clear the table
 def clear_all():
-   for item in table.get_children():
-      table.delete(item)
+    # clear the data from previous search
+    global data
+    data = []
+    global pages
+    pages = 0
+    # disable the nav buttons to stop errors
+    page_number.configure(text="")
+    previous.configure(state='disabled')
+    next.configure(state='disabled')
+    # reset status label
+    status_label.configure(text='Data cleared, waiting to search', text_color='white')
+    for item in table.get_children():
+        table.delete(item)
 
 # method to scrape multiple pages
 def search_pages(url):
@@ -30,6 +45,16 @@ def search_pages(url):
             search_pages('http://books.toscrape.com/catalogue/' + href)
     except:
         print('No more pages')
+        # pagination, divide the pages by the limit per page, then add one if needed
+        global data 
+        # .get_children method returns ids only
+        temp = table.get_children()
+        # loop through the ids and retrieve the value for each, then add it to the global data array
+        for i in temp:
+            data.append(table.item(i))
+        global pages
+        pages = len(data) // 20 + (1 if len(data) % 20 else 0)
+        update_table(1)
 
 # webscrape method
 def find_books(soup):
@@ -75,13 +100,66 @@ def find_books(soup):
             for i, item in enumerate(book_info):
                 table.column(headers[i],anchor=tkinter.CENTER)
 
+# TODO, when searching again without clearing, it repeats the initial search and adds duplicate entries
+# fix the lazy way by running the clear every time before searching, or scan and remove dupes
+
+# Pagination methods
+def update_table(page):
+    # Clear the old content
+    table.delete(*table.get_children())
+    
+    # Slice the data according to the page number
+    start = (page - 1) * 20
+    end = start + 20
+    sliced_data = data[start:end]
+    
+    # Insert the new content
+    for item in sliced_data:
+        # need to pass values as the key, otherwise will get ghibberish back
+        table.insert("", tkinter.END, values=item['values'])
+    
+    # Update the page label
+    page_number.configure(text=f"Page {page} of {pages}")
+
+    # enable the nav buttons
+    previous.configure(state='normal')
+    next.configure(state='normal')
+    
+
+def prev_page():
+    # Get the current page number
+    # pull the text from the page label, split it (by spaces) and get the second item, which is the page number in this case
+    current_page = int(page_number.cget("text").split()[1])
+    
+    # Check if it is not the first page
+    if current_page > 1:
+        # Decrement the page number by one
+        new_page = current_page - 1
+        
+        # Update the table content
+        update_table(new_page)
+
+def next_page():
+    # Get the current page number
+    # pull the text from the page label, split it (by spaces) and get the second item, which is the page number in this case
+    current_page = int(page_number.cget("text").split()[1])
+    
+    # Check if it is not the last page
+    if current_page < pages:
+        # Increment the page number by one
+        new_page = current_page + 1
+        
+        # Update the table content
+        update_table(new_page)
+                
+
 # ui system settings
 customtkinter.set_appearance_mode("System")
 customtkinter.set_default_color_theme('blue')
 
 # initialize
 app = customtkinter.CTk()
-app.geometry("1080x720")
+app.geometry("1280x800")
 app.title('GUI Webscrapper')
 
 # TITLE
@@ -106,14 +184,14 @@ download.pack(padx=10, pady=10)
 clear = customtkinter.CTkButton(app, text='Reset Results', command=clear_all)
 clear.pack(pady=(0, 10))
 
-# DISPLAY TABLE AND LABEL
+# DISPLAY TABLE, LABEL and PAGINATION
 tabLabel = customtkinter.CTkLabel(app, text='Results will be displayed below, if nothing is found check your spelling or try a different book')
 tabLabel.pack()
 
 # headers used to set lead rows and loop through when adding more rows
 headers=['Title', 'Price', 'Rating', 'Stock', 'Link']
 # create the table and set row heights
-table=tkinter.ttk.Treeview(app, height=25, columns=headers, show='headings')
+table=tkinter.ttk.Treeview(app, height=20, columns=headers, show='headings')
 # column set to give each one a more fitting width
 table.column('Title', width=400)
 # heading to create the header for each column
@@ -124,10 +202,21 @@ table.column('Rating', width=200)
 table.heading('Rating', text='Rating')
 table.column('Stock', width=150)
 table.heading('Stock', text='Stock')
-table.column('Link', width=200)
+table.column('Link', width=400)
 table.heading('Link', text='Link')
 table.pack(padx=10, pady=10)
-# TODO, table might be too much of a pain, bing exmaple just made a psuedo table with text widget, look into that
+
+# pagination controls and info
+page_number = customtkinter.CTkLabel(app, text='') #will be filled at runtime
+page_number.pack(pady = (0, 10))
+
+# TODO, make this do something
+previous = customtkinter.CTkButton(app, text='Previous', command=prev_page, state='disabled')
+previous.pack(padx=10, pady=10, side='left')
+
+next = customtkinter.CTkButton(app, text='Next', command=next_page, state='disabled')
+next.pack(padx=10, pady=10, side='right')
+
 
 # nifty library to make the ugly table into dark mode
 sv_ttk.set_theme("dark")
