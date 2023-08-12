@@ -207,7 +207,6 @@ table.pack(padx=10, pady=10)
 page_number = customtkinter.CTkLabel(app, text='') #will be filled at runtime
 page_number.pack(pady = (0, 10))
 
-# TODO, make this do something
 previous = customtkinter.CTkButton(app, text='Previous', command=prev_page, state='disabled')
 previous.pack(padx=10, pady=10, side='left')
 
