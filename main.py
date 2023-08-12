@@ -100,9 +100,6 @@ def find_books(soup):
             for i, item in enumerate(book_info):
                 table.column(headers[i],anchor=tkinter.CENTER)
 
-# TODO, when searching again without clearing, it repeats the initial search and adds duplicate entries
-# fix the lazy way by running the clear every time before searching, or scan and remove dupes
-
 # Pagination methods
 def update_table(page):
     # Clear the old content
@@ -177,7 +174,7 @@ status_label.pack()
 
 # SEARCH BUTTON
 # need to wrap inline button function calls in a lambda or it runs right away everytime
-download = customtkinter.CTkButton(app, text='Search', command= lambda: search_pages('http://books.toscrape.com/'))
+download = customtkinter.CTkButton(app, text='Search', command= lambda: (clear_all(), search_pages('http://books.toscrape.com/')))
 download.pack(padx=10, pady=10)
 
 # CLEAR BUTTON
