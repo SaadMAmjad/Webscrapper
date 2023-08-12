@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 import requests
-import time
+# import time
 import tkinter
 import customtkinter
 import sv_ttk
@@ -173,7 +173,7 @@ status_label = customtkinter.CTkLabel(app, text='Waiting to search')
 status_label.pack()
 
 # SEARCH BUTTON
-# need to wrap inline button function calls in a lambda or it runs right away everytime
+# need to wrap inline button function calls in a lambda or it runs right away everytime, can also call multiple this way
 download = customtkinter.CTkButton(app, text='Search', command= lambda: (clear_all(), search_pages('http://books.toscrape.com/')))
 download.pack(padx=10, pady=10)
 
