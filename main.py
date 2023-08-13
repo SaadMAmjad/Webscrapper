@@ -3,19 +3,21 @@ import requests
 # import time
 import tkinter
 import customtkinter
-import sv_ttk
+# library for theming, causes problems when exporting as exe
+# import sv_ttk
 
-# variables to hold the data between page switching, and the current page number respectively
+
+# variables to hold the data between page switching (for pagination), and the current page number respectively
 data = []
-pages = 0
+pages = 1
 
 # function to clear the table
 def clear_all():
-    # clear the data from previous search
+    # clear the data from previous search and reset global vars
     global data
     data = []
     global pages
-    pages = 0
+    pages = 1
     # disable the nav buttons to stop errors
     page_number.configure(text="")
     previous.configure(state='disabled')
@@ -203,6 +205,13 @@ table.column('Link', width=400)
 table.heading('Link', text='Link')
 table.pack(padx=10, pady=10)
 
+# set the styles for the table and the rows
+style = tkinter.ttk.Style(app)
+# set ttk theme to "clam" which support the fieldbackground option
+style.theme_use("clam")
+style.configure("Treeview.Heading", background="black", foreground="white", fieldbackground="black")
+style.configure("Treeview", background="black", foreground="white", fieldbackground="black")
+
 # pagination controls and info
 page_number = customtkinter.CTkLabel(app, text='') #will be filled at runtime
 page_number.pack(pady = (0, 10))
@@ -213,9 +222,8 @@ previous.pack(padx=10, pady=10, side='left')
 next = customtkinter.CTkButton(app, text='Next', command=next_page, state='disabled')
 next.pack(padx=10, pady=10, side='right')
 
-
 # nifty library to make the ugly table into dark mode
-sv_ttk.set_theme("dark")
+# sv_ttk.set_theme("dark")
 
 # need to create a 'loop' to run the app so it doesn't close instantly
 app.mainloop()
