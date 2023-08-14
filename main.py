@@ -23,14 +23,14 @@ def clear_all():
     previous.configure(state='disabled')
     next.configure(state='disabled')
     # reset status label
-    status_label.configure(text='Data cleared, waiting to search', text_color='white')
+    status_label.configure(text='Data cleared, waiting to search')
     for item in table.get_children():
         table.delete(item)
 
 # method to scrape multiple pages
 def search_pages(url):
     # this doesn't display first, something to do with threading? Kinda beyond the scope of this project to fix
-    status_label.configure(text='Searching...', text_color='white')
+    status_label.configure(text='Searching...')
     # create new request and get url for first page
     html_text = requests.get(url).text
     soup = BeautifulSoup(html_text, "lxml")
@@ -65,9 +65,9 @@ def find_books(soup):
 
     # check whether any input was given and tell the user what happens in each case
     if search.get() or search.get() != '':
-        status_label.configure(text=f'Showing results for "{search.get()}"', text_color='white')
+        status_label.configure(text=f'Showing results for "{search.get()}"')
     else:
-        status_label.configure(text='Displaying all books', text_color='white')
+        status_label.configure(text='Displaying all books')
 
     for current_book in books:
 
@@ -153,7 +153,7 @@ def next_page():
                 
 
 # ui system settings
-customtkinter.set_appearance_mode("System")
+customtkinter.set_appearance_mode("Light")
 customtkinter.set_default_color_theme('blue')
 
 # initialize
@@ -204,13 +204,6 @@ table.heading('Stock', text='Stock')
 table.column('Link', width=400)
 table.heading('Link', text='Link')
 table.pack(padx=10, pady=10)
-
-# set the styles for the table and the rows
-style = tkinter.ttk.Style(app)
-# set ttk theme to "clam" which support the fieldbackground option
-style.theme_use("clam")
-style.configure("Treeview.Heading", background="black", foreground="white", fieldbackground="black")
-style.configure("Treeview", background="black", foreground="white", fieldbackground="black")
 
 # pagination controls and info
 page_number = customtkinter.CTkLabel(app, text='') #will be filled at runtime
