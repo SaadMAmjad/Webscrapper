@@ -7,7 +7,7 @@
 - Enter the book you wish to search for, or leave blank to see all books on the site
 - It will take ~10-15 seconds to complete the search
 - Matching results will be returned in sets of 20 with pagination
-- Title, price, rating, stock statues and links are displayed
+- Title, price, rating, stock status and links are displayed
 - Use the clear button to reset the table
 
 To use, download and find the exe in the 'dist' folder
